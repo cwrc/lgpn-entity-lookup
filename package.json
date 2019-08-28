@@ -1,0 +1,77 @@
+{
+  "name": "lgpn-entity-lookup",
+  "version": "0.0.1-development",
+  "description": "Find entities (people, places) in the LGPN.",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cwrc/lgpn-entity-lookup.git"
+  },
+  "keywords": [
+    "lgpn",
+    "entity",
+    "linked-data"
+  ],
+  "author": "James Chartrand",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/cwrc/lgpn-entity-lookup/issues"
+  },
+  "homepage": "https://github.com/cwrc/lgpn-entity-lookup#readme",
+  "scripts": {
+    "semantic-release": "semantic-release",
+    "cm": "git-cz",
+    "browserify": "mkdirp build && browserify test/development.js -o build/development.js --debug",
+    "watch": "mkdirp build && watchify test/development.js -o build/development.js --debug --verbose",
+    "test": "jest",
+    "report-coverage": "cat ./coverage/coverage-final.json | codecov",
+    "travis-deploy-once": "travis-deploy-once"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-transform-runtime": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "@babel/runtime-corejs2": "^7.5.5",
+    "babelify": "^10.0.0",
+    "browserify": "^16.2.3",
+    "codecov": "^3.5.0",
+    "commitizen": "^3.1.1",
+    "cz-conventional-changelog": "^2.1.0",
+    "fetch-mock": "^5.13.1",
+    "husky": "^2.1.0",
+    "jest": "^24.9.0",
+    "mkdirp": "0.5.1",
+    "semantic-release": "^15.13.12",
+    "travis-deploy-once": "^5.0.11",
+    "watchify": "^3.11.1"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-conventional-changelog"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run test"
+    }
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "./src/index.js"
+    ],
+    "coverageDirectory": "./coverage",
+    "coverageThreshold": {
+      "global": {
+        "branches": 90,
+        "functions": 90,
+        "lines": 90,
+        "statements": 90
+      }
+    },
+    "testMatch": [
+      "**/test/**/*.[jt]s?(x)"
+    ]
+  },
+  "dependencies": {}
+}
