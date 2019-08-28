@@ -5,14 +5,14 @@
   "main": "src/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cwrc/lgpn-entity-lookup.git"
+    "url": "git+https://github.com/cwrc/lgpn-entity-lookup.git"
   },
   "keywords": [
     "lgpn",
     "entity",
     "linked-data"
   ],
-  "author": "James Chartrand",
+  "author": "Andrew MacDonald",
   "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/cwrc/lgpn-entity-lookup/issues"
@@ -70,8 +70,11 @@
       }
     },
     "testMatch": [
-      "**/test/**/*.[jt]s?(x)"
+      "**/test/test.js"
     ]
   },
-  "dependencies": {}
+  "dependencies": {},
+  "directories": {
+    "test": "test"
+  }
 }

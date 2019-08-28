@@ -1,31 +1,26 @@
 'use strict';
 
-let dbpedia = require('../src/index.js');
+let lgpn = require('../src/index.js');
 
 const fetchMock = require('fetch-mock');
 
-const queryString = 'smith';
+const queryString = 'Αβα';
 const queryStringWithNoResults = 'ldfjk';
 const queryStringForTimeout = "chartrand";
 const queryStringForError = "cuff";
-const queryStringForMissingDescriptionInResult = 'blash';
 const expectedResultLength = 5;
-const emptyResultFixture = JSON.stringify(require('./httpResponseMocks/noResults.json'));
-const resultsFixture = JSON.stringify(require('./httpResponseMocks/results.json'));
-const noDescResultsFixture = JSON.stringify(require('./httpResponseMocks/resultsWitoutDescription.json'));
+const emptyResultFixture = require('./httpResponseMocks/noResults.js');
+const resultsFixture = require('./httpResponseMocks/results.js');
 
 jest.useFakeTimers();
 
 // setup server mocks for each type of call
 [
     { uriBuilderFn: 'getPersonLookupURI', testFixture: resultsFixture },
-    { uriBuilderFn: 'getPlaceLookupURI', testFixture: resultsFixture },
-    { uriBuilderFn: 'getOrganizationLookupURI', testFixture: resultsFixture },
-    { uriBuilderFn: 'getTitleLookupURI', testFixture: resultsFixture },
-    { uriBuilderFn: 'getRSLookupURI', testFixture: resultsFixture }
+    { uriBuilderFn: 'getPlaceLookupURI', testFixture: resultsFixture }
 ].forEach(entityLookup => {
 
-    let uriBuilderFn = dbpedia[entityLookup.uriBuilderFn];
+    let uriBuilderFn = lgpn[entityLookup.uriBuilderFn];
 
     fetchMock.get(uriBuilderFn(queryString), entityLookup.testFixture);
     fetchMock.get(uriBuilderFn(queryStringWithNoResults), emptyResultFixture);
@@ -33,7 +28,6 @@ jest.useFakeTimers();
         setTimeout(Promise.resolve, 8100);
     });
     fetchMock.get(uriBuilderFn(queryStringForError), 500);
-    fetchMock.get(uriBuilderFn(queryStringForMissingDescriptionInResult), noDescResultsFixture)
 })
 
 // from https://stackoverflow.com/a/35047888
@@ -44,48 +38,30 @@ function doObjectsHaveSameKeys(...objects) {
 }
 
 test('lookup builders', () => {
-    expect.assertions(5);
-    ['getPersonLookupURI', 'getPlaceLookupURI', 'getOrganizationLookupURI', 'getTitleLookupURI', 'getRSLookupURI'].forEach(uriBuilderMethod => {
-        expect(dbpedia[uriBuilderMethod](queryString).includes(queryString)).toBe(true);
+    expect.assertions(2);
+    ['getPersonLookupURI', 'getPlaceLookupURI'].forEach(uriBuilderMethod => {
+        expect(lgpn[uriBuilderMethod](queryString).includes(encodeURIComponent(queryString))).toBe(true);
     });
 });
 
-['findPerson', 'findPlace', 'findOrganization', 'findTitle', 'findRS'].forEach((nameOfLookupFn) => {
+['findPerson', 'findPlace'].forEach((nameOfLookupFn) => {
     test(nameOfLookupFn, async () => {
-        expect.assertions(21);
-        let lookupFn = dbpedia[nameOfLookupFn];
+        expect.assertions(13);
+        let lookupFn = lgpn[nameOfLookupFn];
         expect(typeof lookupFn).toBe('function');
         let results = await lookupFn(queryString);
         expect(Array.isArray(results)).toBe(true);
         expect(results.length).toBeLessThanOrEqual(expectedResultLength);
         results.forEach(singleResult => {
             expect(doObjectsHaveSameKeys(singleResult, {
-                nameType: '',
                 id: '',
                 uri: '',
                 uriForDisplay: '',
                 name: '',
                 repository: '',
-                originalQueryString: '',
                 description: ''
             })).toBe(true);
-            expect(singleResult.originalQueryString).toBe(queryString);
         })
-
-        // with a result from dbpedia with no Description
-        results = await lookupFn(queryStringForMissingDescriptionInResult);
-        expect(Array.isArray(results)).toBe(true);
-        expect(doObjectsHaveSameKeys(results[0], {
-            nameType: '',
-            id: '',
-            uri: '',
-            uriForDisplay: '',
-            name: '',
-            repository: '',
-            originalQueryString: '',
-            description: ''
-        })).toBe(true);
-        expect(results[0].description).toBe('No description available');
 
         // with no results
         results = await lookupFn(queryStringWithNoResults);
@@ -111,7 +87,3 @@ test('lookup builders', () => {
         }
     })
 })
-
-
-
-
