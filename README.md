@@ -1,3 +1,5 @@
+# lgpn-entity-lookup
+
 ![Picture](http://cwrc.ca/logos/CWRC_logos_2016_versions/CWRCLogo-Horz-FullColour.png)
 
 [![Travis](https://img.shields.io/travis/cwrc/lgpn-entity-lookup.svg)](https://travis-ci.org/cwrc/lgpn-entity-lookup)
@@ -9,11 +11,9 @@
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 [![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
 
-# lgpn-entity-lookup
-
 1. [Overview](#overview)
 
-### Overview
+## Overview
 
 Finds entities (people and places) in the [LGPN](http://www.lgpn.ox.ac.uk/).  Meant to be used with [cwrc-public-entity-dialogs](https://github.com/cwrc-public-entity-dialogs) where it runs in the browser.
 
