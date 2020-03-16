@@ -2,7 +2,7 @@
   "name": "lgpn-entity-lookup",
   "version": "0.0.0-development",
   "description": "Find entities (people, places) in the LGPN.",
-   "keywords": [
+  "keywords": [
     "lgpn",
     "entity",
     "linked-data"
