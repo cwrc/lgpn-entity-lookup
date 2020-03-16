@@ -1,16 +1,19 @@
 'use strict';
 
-let lgpn = require('../src/index.js');
+import fetchMock from 'fetch-mock';
+import lgpn from '../src/index.js';
 
-const fetchMock = require('fetch-mock');
+fetchMock.config.overwriteRoutes = false;
+
+const emptyResultFixture = require('./httpResponseMocks/noResults.js');
+const resultsFixture = require('./httpResponseMocks/results.js');
 
 const queryString = 'Αβα';
 const queryStringWithNoResults = 'ldfjk';
-const queryStringForTimeout = "chartrand";
-const queryStringForError = "cuff";
+const queryStringForTimeout = 'chartrand';
+const queryStringForError = 'cuff';
 const expectedResultLength = 5;
-const emptyResultFixture = require('./httpResponseMocks/noResults.js');
-const resultsFixture = require('./httpResponseMocks/results.js');
+
 
 jest.useFakeTimers();
 
@@ -20,18 +23,19 @@ jest.useFakeTimers();
     { uriBuilderFn: 'getPlaceLookupURI', testFixture: resultsFixture }
 ].forEach(entityLookup => {
 
-    let uriBuilderFn = lgpn[entityLookup.uriBuilderFn];
-
+    const uriBuilderFn = lgpn[entityLookup.uriBuilderFn];
+    
+    console.log(uriBuilderFn(queryString))
     fetchMock.get(uriBuilderFn(queryString), entityLookup.testFixture);
     fetchMock.get(uriBuilderFn(queryStringWithNoResults), emptyResultFixture);
-    fetchMock.get(uriBuilderFn(queryStringForTimeout), (url, opts) => {
+    fetchMock.get(uriBuilderFn(queryStringForTimeout), () => {
         setTimeout(Promise.resolve, 8100);
     });
     fetchMock.get(uriBuilderFn(queryStringForError), 500);
 })
 
 // from https://stackoverflow.com/a/35047888
-function doObjectsHaveSameKeys(...objects) {
+const doObjectsHaveSameKeys = (...objects) => {
     const allKeys = objects.reduce((keys, object) => keys.concat(Object.keys(object)), []);
     const union = new Set(allKeys);
     return objects.every(object => union.size === Object.keys(object).length);
@@ -44,12 +48,12 @@ test('lookup builders', () => {
     });
 });
 
-['findPerson', 'findPlace'].forEach((nameOfLookupFn) => {
+['findPerson'].forEach((nameOfLookupFn) => {
+    
     test(nameOfLookupFn, async () => {
-        expect.assertions(13);
-        let lookupFn = lgpn[nameOfLookupFn];
-        expect(typeof lookupFn).toBe('function');
-        let results = await lookupFn(queryString);
+        expect.assertions(7);
+        
+        const results = await lgpn[nameOfLookupFn](queryString);
         expect(Array.isArray(results)).toBe(true);
         expect(results.length).toBeLessThanOrEqual(expectedResultLength);
         results.forEach(singleResult => {
@@ -63,27 +67,38 @@ test('lookup builders', () => {
             })).toBe(true);
         })
 
+    })
+
+    test(`${nameOfLookupFn} - no results`, async () => {
         // with no results
-        results = await lookupFn(queryStringWithNoResults);
+        expect.assertions(2);
+
+        const results = await lgpn[nameOfLookupFn](queryStringWithNoResults);
         expect(Array.isArray(results)).toBe(true);
         expect(results.length).toBe(0);
 
+    })
+
+    test(`${nameOfLookupFn} - server error`, async () => {
         // with a server error
+        expect.assertions(2);
+
         let shouldBeNullResult = false;
-        shouldBeNullResult = await lookupFn(queryStringForError).catch(error => {
+        shouldBeNullResult = await lgpn[nameOfLookupFn](queryStringForError).catch( () => {
             // an http error should reject the promise
             expect(true).toBe(true);
             return false;
         })
         // a falsey result should be returned
         expect(shouldBeNullResult).toBeFalsy();
-
-        // when query times out
-        try {
-            await lookupFn(queryStringForTimeout);
-        } catch (err) {
-            // the promise should be rejected
-            expect(true).toBe(true);
-        }
     })
+
+    test(`${nameOfLookupFn} - times out`, async () => {
+        // when query times out
+        expect.assertions(1);
+        await lgpn[nameOfLookupFn](queryStringForTimeout)
+            .catch( () => {
+                expect(true).toBe(true);
+            })
+   })
 })

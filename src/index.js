@@ -1,77 +1,81 @@
 'use strict';
 
-function fetchWithTimeout(url, config = {headers: {'Accept': 'application/json'}}, timeout = 30000) {
+const fetchWithTimeout = async (url, config = {headers: {'Accept': 'application/json'}}, time = 30000) => {
 
-        return new Promise((resolve, reject) => {
-            // the reject on the promise in the timeout callback won't have any effect, *unless*
-            // the timeout is triggered before the fetch resolves, in which case the setTimeout rejects
-            // the whole outer Promise, and the promise from the fetch is dropped entirely.
-            setTimeout(() => reject(new Error('Call to LGPN timed out')), timeout);
-            fetch(url, config).then(resolve, reject);
-        }).then(
-            response=>{
-                // check for ok status
-                if (response.ok) {
-                    return response.text().then((str) => {
-                        // response is wrapped in a function so we need to trim it
-                        const start = str.indexOf('{');
-                        const end = str.lastIndexOf(');');
-                        try {
-                            const substr = str.substring(start, end);
-                            return JSON.parse(substr);
-                        } catch (e) {
-                            throw new Error(`Something wrong with the call to LGPN, possibly a problem with the network or the server. HTTP error: ${e}`);            
-                        }
-                    })
-                }
-                // if status not ok, through an error
-                throw new Error(`Something wrong with the call to LGPN, possibly a problem with the network or the server. HTTP error: ${response.status}`);
-            }
-        )
+    /*
+        the reject on the promise in the timeout callback won't have any effect, *unless*
+        the timeout is triggered before the fetch resolves, in which case the setTimeout rejects
+        the whole outer Promise, and the promise from the fetch is dropped entirely.
+    */
+
+    // Create a promise that rejects in <time> milliseconds
+	const timeout = new Promise((resolve, reject) => {
+		let id = setTimeout(() => {
+			clearTimeout(id);
+			reject('Call to LGPN timed out')
+		}, time)
+	})
+
+  // Returns a race between our timeout and the passed in promise
+	return Promise.race([
+		fetch(url, config),
+		timeout
+	])
+
 }
 
-function getEntitySourceURI(queryString) {
+const getEntitySourceURI = (queryString) => {
     // Calls a cwrc proxy (https://lookup.services.cwrc.ca/lgpn2), so that we can make https calls from the browser.
     // The proxy in turn then calls http://clas-lgpn2.classics.ox.ac.uk/
     // The lgpn lookup doesn't seem to have an https endpoint
     return `https://lookup.services.cwrc.ca/lgpn2/cgi-bin/lgpn_search.cgi?name=${encodeURIComponent(queryString)};style=json`
 }
 
-function getPersonLookupURI(queryString) {
-    return getEntitySourceURI(queryString)
-}
+const getPersonLookupURI = (queryString) => getEntitySourceURI(queryString);
 
-function getPlaceLookupURI(queryString) {
-    return getEntitySourceURI(queryString)
-}
+const getPlaceLookupURI = (queryString) => getEntitySourceURI(queryString);
 
-function callLGPN(url, queryString) {
-    return fetchWithTimeout(url).then((parsedJSON)=>{
-        return parsedJSON.persons.map(({id, name, place, notBefore, notAfter}) => {
-            const description = `Place: ${place}<br/>Floruit: ${notBefore} to ${notAfter}`;
-            return {
-                id: id,
-                name: name,
-                repository: 'lgpn',
-                uri: 'https://www.lgpn.ox.ac.uk/id/'+id,
-                uriForDisplay: 'https://www.lgpn.ox.ac.uk/id/'+id,
-                description: description
-            }
+const callLGPN = async (url) => {
+
+    const response = await fetchWithTimeout(url)
+        .catch((error) => {
+            return error;
         })
+
+    //if status not ok, through an error
+    if (!response.ok) throw new Error(`Something wrong with the call to LGPN, possibly a problem with the network or the server. HTTP error: ${response.status}`)
+    
+    const responseText = await response.text();
+
+    //find the result object
+    const start = responseText.indexOf('{');
+    const end = responseText.lastIndexOf(');');
+    const substr = responseText.substring(start, end);
+
+    const result = JSON.parse(substr);
+
+    const mapResponse = result.persons.map(({id, name, place, notBefore, notAfter}) => {
+        const description = `Place: ${place}<br/>Floruit: ${notBefore} to ${notAfter}`;
+        return {
+            id,
+            name,
+            repository: 'lgpn',
+            uri: 'https://www.lgpn.ox.ac.uk/id/'+id,
+            uriForDisplay: 'https://www.lgpn.ox.ac.uk/id/'+id,
+            description
+        }
     })
+
+    return mapResponse; 
 }
 
-function findPerson(queryString) {
-    return callLGPN(getPersonLookupURI(queryString), queryString)
-}
+const findPerson = (queryString) => callLGPN(getPersonLookupURI(queryString));
 
-function findPlace(queryString) {
-    return callLGPN(getPlaceLookupURI(queryString), queryString)
-}
+const findPlace = (queryString) => callLGPN(getPlaceLookupURI(queryString));
 
-module.exports = {
-    findPerson: findPerson,
-    findPlace: findPlace,
-    getPersonLookupURI: getPersonLookupURI,
-    getPlaceLookupURI: getPlaceLookupURI
+export default {
+    findPerson,
+    findPlace,
+    getPersonLookupURI,
+    getPlaceLookupURI
 }
