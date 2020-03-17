@@ -25,7 +25,6 @@ jest.useFakeTimers();
 
     const uriBuilderFn = lgpn[entityLookup.uriBuilderFn];
     
-    console.log(uriBuilderFn(queryString))
     fetchMock.get(uriBuilderFn(queryString), entityLookup.testFixture);
     fetchMock.get(uriBuilderFn(queryStringWithNoResults), emptyResultFixture);
     fetchMock.get(uriBuilderFn(queryStringForTimeout), () => {
@@ -48,7 +47,7 @@ test('lookup builders', () => {
     });
 });
 
-['findPerson'].forEach((nameOfLookupFn) => {
+['findPerson','findPlace'].forEach((nameOfLookupFn) => {
     
     test(nameOfLookupFn, async () => {
         expect.assertions(7);
@@ -65,9 +64,8 @@ test('lookup builders', () => {
                 repository: '',
                 description: ''
             })).toBe(true);
-        })
-
-    })
+        });
+    });
 
     test(`${nameOfLookupFn} - no results`, async () => {
         // with no results
@@ -76,8 +74,7 @@ test('lookup builders', () => {
         const results = await lgpn[nameOfLookupFn](queryStringWithNoResults);
         expect(Array.isArray(results)).toBe(true);
         expect(results.length).toBe(0);
-
-    })
+    });
 
     test(`${nameOfLookupFn} - server error`, async () => {
         // with a server error
@@ -99,6 +96,7 @@ test('lookup builders', () => {
         await lgpn[nameOfLookupFn](queryStringForTimeout)
             .catch( () => {
                 expect(true).toBe(true);
-            })
-   })
-})
+            });
+   });
+   
+});
