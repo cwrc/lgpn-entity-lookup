@@ -4,18 +4,12 @@ cache: npm
 notifications:
   email: false
 node_js:
-  - '9'
-before_script:
-  - npm prune
+  - '13.9.0'
 script:
   - npm run test
 after_success:
   - npm run report-coverage
   - npm run travis-deploy-once "npm run semantic-release"
 branches:
-  except:
-    - /^v\d+\.\d+\.\d+$/
-services:
-  - xvfb
-install:
-  - npm install
+  only:
+    - master
