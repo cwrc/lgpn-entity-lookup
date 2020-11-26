@@ -1,15 +1,19 @@
-dist: xenial
+os: linux
+dist: bionic
 language: node_js
 cache: npm
 notifications:
   email: false
 node_js:
-  - '14.5.0'
-script:
-  - npm run test
-after_success:
-  - npm run report-coverage
-  - npm run travis-deploy-once "npm run semantic-release"
-branches:
-  only:
-    - master
+  - 15
+jobs:
+  include:
+  - stage: test
+    script: npm run test
+  - stage: coverage
+    script: 
+     - npm run report-coverage
+     - npm run semantic-release
+# branches:
+#   only:
+#     - master
