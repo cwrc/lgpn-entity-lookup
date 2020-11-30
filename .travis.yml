@@ -5,15 +5,21 @@ cache: npm
 notifications:
   email: false
 node_js:
-  - 15
+  - "14.15.1"
 jobs:
   include:
-  - stage: test
-    script: npm run test
-  - stage: coverage
-    script: 
-     - npm run report-coverage
-     - npm run semantic-release
-# branches:
-#   only:
-#     - master
+  
+    - stage: test
+      script: npm run test
+
+    - stage: npm release
+      branches:
+        only:
+          - master
+      script:
+        - echo "Deploying to npm ..."
+        - npm run report-coverage
+      deploy:
+        provider: npm
+        email: lucaju@gmail.com
+        api_key: $NPM_API_TOKEN
