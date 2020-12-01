@@ -10,7 +10,6 @@ jobs:
   include:
     - stage: test
       script: npm run test
-
     - stage: npm release
       if: branch = master
       script:

@@ -22,10 +22,10 @@
     "url": "https://github.com/cwrc/lgpn-entity-lookup.git"
   },
   "scripts": {
-    "semantic-release": "semantic-release",
     "cm": "git-cz",
     "test": "jest",
-    "report-coverage": "cat ./coverage/coverage-final.json | codecov"
+    "report-coverage": "cat ./coverage/coverage-final.json | codecov",
+    "semantic-release": "semantic-release"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
@@ -36,6 +36,7 @@
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^7.14.0",
     "fetch-mock": "^9.11.0",
+    "git-cz": "^4.7.5",
     "husky": "^4.3.0",
     "jest": "^26.6.3",
     "semantic-release": "^17.3.0"
