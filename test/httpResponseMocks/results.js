@@ -31,4 +31,4 @@ module.exports = `lgpn({
   "notAfter": "-0350"
 }
 ]
-});`
+});`;
