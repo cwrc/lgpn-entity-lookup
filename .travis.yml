@@ -17,4 +17,4 @@ jobs:
         - echo "Deploying to npm ..."
       deploy:
         provider: script
-        script: npm semantic-release
+        script: npx semantic-release
