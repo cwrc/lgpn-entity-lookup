@@ -27,8 +27,8 @@ const callLGPN = async (url) => {
   const responseText = await response.text();
 
   //find the result object
-  const start = responseText.indexOf("{");
-  const end = responseText.lastIndexOf(");");
+  const start = responseText.indexOf('{');
+  const end = responseText.lastIndexOf(');');
   const substr = responseText.substring(start, end);
 
   const result = JSON.parse(substr);
@@ -38,7 +38,7 @@ const callLGPN = async (url) => {
     return {
       id,
       name,
-      repository: "lgpn",
+      repository: 'lgpn',
       uri: `https://www.lgpn.ox.ac.uk/id/${id}`,
       uriForDisplay: `https://www.lgpn.ox.ac.uk/id/${id}`,
       description,
@@ -48,7 +48,7 @@ const callLGPN = async (url) => {
   return mapResponse;
 };
 
-const fetchWithTimeout = async (url, config = { headers: { Accept: "application/json" } }) => {
+const fetchWithTimeout = async (url, config = { headers: { Accept: 'application/json' } }) => {
   /*
 	the reject on the promise in the timeout callback won't have any effect, *unless*
 	the timeout is triggered before the fetch resolves, in which case the setTimeout rejects
@@ -59,7 +59,7 @@ const fetchWithTimeout = async (url, config = { headers: { Accept: "application/
   const timeout = new Promise((resolve, reject) => {
     const id = setTimeout(() => {
       clearTimeout(id);
-      reject("Call to LGPN timed out");
+      reject('Call to LGPN timed out');
     }, 20000);
   });
 

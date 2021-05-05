@@ -39,7 +39,9 @@ const doObjectsHaveSameKeys = (...objects) => {
 test('lookup builders', () => {
   expect.assertions(2);
   ['getPersonLookupURI', 'getPlaceLookupURI'].forEach((uriBuilderMethod) => {
-    expect(lgpn[uriBuilderMethod](queryString).includes(encodeURIComponent(queryString))).toBe(true);
+    expect(lgpn[uriBuilderMethod](queryString).includes(encodeURIComponent(queryString))).toBe(
+      true
+    );
   });
 });
 
