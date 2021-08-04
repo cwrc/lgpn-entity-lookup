@@ -53,7 +53,8 @@ jobs:
         run: npx semantic-release
 
   publish-gpr:
-    needs: test
+    if: github.ref == 'refs/heads/master'
+    needs: tests
     name: Release on GitHub
     runs-on: ubuntu-latest
     permissions:
